@@ -30,7 +30,7 @@ func (s *Server) handlepostadvertisement() http.HandlerFunc {
 		}
 		if req.StatusCode != 200 {
 			w.WriteHeader(req.StatusCode)
-			fmt.Println(w, "Request to DB can't be completed...")
+			fmt.Fprint(w, "Request to DB can't be completed...")
 			fmt.Println("Unable to request post advertisement to the CRUD service")
 		}
 		if req.StatusCode == 500 {
@@ -83,19 +83,19 @@ func (s *Server) handleupdateadvertisement() http.HandlerFunc {
 		requestByte, _ := json.Marshal(updateAdvertisement)
 		req, err := http.NewRequest("PUT", "http://"+config.CRUDHost+":"+config.CRUDPort+"/advertisement", bytes.NewBuffer(requestByte))
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprint(w, err.Error())
 			fmt.Println("Error in communication with CRUD service endpoint for request to update advertisement")
 			return
 		}
 		// Fetch Request
 		resp, err := client.Do(req)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprint(w, err.Error())
 			return
 		}
 		if resp.StatusCode != 200 {
 			w.WriteHeader(resp.StatusCode)
-			fmt.Println(w, "Request to DB can't be completed...")
+			fmt.Fprint(w, "Request to DB can't be completed...")
 			fmt.Println("Unable to request update advertisement to the CRUD service")
 		}
 		if resp.StatusCode == 500 {
@@ -124,7 +124,7 @@ func (s *Server) handleupdateadvertisement() http.HandlerFunc {
 		if jserr != nil {
 			w.WriteHeader(500)
 			fmt.Fprint(w, jserr.Error())
-			fmt.Println(w, "Error occured when trying to marshal the decoded response into specified JSON format!")
+			fmt.Println("Error occured when trying to marshal the decoded response into specified JSON format!")
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -153,13 +153,13 @@ func (s *Server) handleremoveuseradvertisements() http.HandlerFunc {
 		// Fetch Request
 		resp, err := client.Do(req)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprint(w, err.Error())
 			return
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != 200 {
 			w.WriteHeader(resp.StatusCode)
-			fmt.Println(w, "Request to DB can't be completed...")
+			fmt.Fprint(w, "Request to DB can't be completed...")
 			fmt.Println("Unable to request delete user advertisements to the CRUD service")
 		}
 		if resp.StatusCode == 500 {
@@ -215,13 +215,13 @@ func (s *Server) handleremoveadvertisement() http.HandlerFunc {
 		// Fetch Request
 		resp, err := client.Do(req)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprint(w, err.Error())
 			return
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != 200 {
 			w.WriteHeader(resp.StatusCode)
-			fmt.Println(w, "Request to DB can't be completed...")
+			fmt.Fprint(w, "Request to DB can't be completed...")
 			fmt.Println("Unable to request delete advertisement to the CRUD service")
 		}
 		if resp.StatusCode == 500 {
@@ -453,14 +453,14 @@ func (s *Server) handlegetadvertisements() http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(500)
 			fmt.Fprintf(w, err.Error())
-			fmt.Println(err.Error())
+			fmt.Println("Error occured in decoding get Advertisement response ")
 			return
 		}
 		js, jserr := json.Marshal(advertisementList)
 		if jserr != nil {
 			w.WriteHeader(500)
 			fmt.Fprintf(w, "Unable to create JSON from Pizza List Result...")
-			fmt.Println(jserr.Error())
+			fmt.Println("Error occured when trying to marshal the decoded response into specified JSON format!")
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
