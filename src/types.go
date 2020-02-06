@@ -36,13 +36,8 @@ type DeleteAdvertisementResult struct {
 	Message              string `json:"message"`
 }
 
-type DeleteUserAdvertisementResult struct {
-	AdvertisementsDeleted bool `json:"advertisementsdeleted"`
-	// ---- Maybe an array of AD ID's that were deleted? ----
-	Message string `json:"message"`
-}
-
 type GetAdvertisementResult struct {
+	AdvertisementID   string `json:"id"`
 	UserID            string `json:"userid"`
 	AdvertisementType string `json:"advertisementtype"`
 	EntityID          string `json:"entityid"`
@@ -50,6 +45,7 @@ type GetAdvertisementResult struct {
 	Description       string `json:"description"`
 }
 
+//not in use
 type GetAdvertisementsResult struct {
 	AdvertisementID   string `json:"advertisementid"`
 	UserID            string `json:"userid"`
@@ -77,6 +73,12 @@ type UserAdvertisementList struct {
 
 type TypeAdvertisementList struct {
 	TypeAdvertisements []GetAdvertisementsResult `json:"typeadvertisements"`
+}
+
+type DeleteUserAdvertisementResult struct {
+	AdvertisementsDeleted bool `json:"advertisementsdeleted"`
+	// ---- Maybe an array of AD ID's that were deleted? ----
+	Message string `json:"message"`
 }
 
 type Server struct {
