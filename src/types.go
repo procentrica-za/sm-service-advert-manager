@@ -45,7 +45,6 @@ type GetAdvertisementResult struct {
 	Description       string `json:"description"`
 }
 
-//not in use
 type GetAdvertisementsResult struct {
 	AdvertisementID   string `json:"advertisementid"`
 	UserID            string `json:"userid"`
@@ -87,4 +86,5 @@ type Server struct {
 type Config struct {
 	CRUDHost string
 	CRUDPort string
+	ListenServePort string
 }

@@ -133,7 +133,7 @@ func (s *Server) handleupdateadvertisement() http.HandlerFunc {
 	}
 }
 
-func (s *Server) handleremoveuseradvertisements() http.HandlerFunc {
+func (s *Server) handledeleteuseradvertisements() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userid := r.URL.Query().Get("id")
 		if userid == "" {
@@ -290,7 +290,11 @@ func (s *Server) handlegetuseradvertisements() http.HandlerFunc {
 			return
 		}
 		defer req.Body.Close()
-		var getUserAdvertisementResponse GetUserAdvertisementResult
+		
+		
+		getUserAdvertisementResponse := UserAdvertisementList{}
+		getUserAdvertisementResponse.UserAdvertisements = []GetUserAdvertisementResult{}
+
 		decoder := json.NewDecoder(req.Body)
 		err := decoder.Decode(&getUserAdvertisementResponse)
 		if err != nil {
@@ -312,16 +316,16 @@ func (s *Server) handlegetuseradvertisements() http.HandlerFunc {
 	}
 }
 
-func (s *Server) handlegettypeadvertisements() http.HandlerFunc {
+func (s *Server) handlegetadvertisementbytype() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		advertisementtype := r.URL.Query().Get("type")
+		advertisementtype := r.URL.Query().Get("adverttype")
 		if advertisementtype == "" {
 			w.WriteHeader(500)
 			fmt.Fprint(w, "AdvertisementID not properly provided in URL")
 			fmt.Println("AdvertisementID not properly provided in URL")
 			return
 		}
-		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/typeadvertisement?type=" + advertisementtype)
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/advertisementtype?adverttype=" + advertisementtype)
 		if respErr != nil {
 			w.WriteHeader(500)
 			fmt.Fprint(w, respErr.Error())
@@ -345,7 +349,8 @@ func (s *Server) handlegettypeadvertisements() http.HandlerFunc {
 			return
 		}
 		defer req.Body.Close()
-		var getTypeAdvertisementResponse TypeAdvertisementList
+		getTypeAdvertisementResponse := TypeAdvertisementList{}
+		getTypeAdvertisementResponse.TypeAdvertisements = []GetAdvertisementsResult{}
 		decoder := json.NewDecoder(req.Body)
 		err := decoder.Decode(&getTypeAdvertisementResponse)
 		if err != nil {
@@ -422,7 +427,7 @@ func (s *Server) handlegetadvertisement() http.HandlerFunc {
 	}
 }
 
-func (s *Server) handlegetadvertisements() http.HandlerFunc {
+func (s *Server) handlegetalladvertisements() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/advertisements")
 		if respErr != nil {
