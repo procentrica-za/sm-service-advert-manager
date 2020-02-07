@@ -452,16 +452,17 @@ func (s *Server) handlegetalladvertisements() http.HandlerFunc {
 			return
 		}
 		defer req.Body.Close()
-		var advertisementList AdvertisementList
+		getAdvertisementList := AdvertisementList{}
+		getAdvertisementList.Advertisements = []GetAdvertisementsResult{}
 		decoder := json.NewDecoder(req.Body)
-		err := decoder.Decode(&advertisementList)
+		err := decoder.Decode(&getAdvertisementList)
 		if err != nil {
 			w.WriteHeader(500)
 			fmt.Fprintf(w, err.Error())
 			fmt.Println("Error occured in decoding get Advertisement response ")
 			return
 		}
-		js, jserr := json.Marshal(advertisementList)
+		js, jserr := json.Marshal(getAdvertisementList)
 		if jserr != nil {
 			w.WriteHeader(500)
 			fmt.Fprintf(w, "Unable to create JSON from Pizza List Result...")

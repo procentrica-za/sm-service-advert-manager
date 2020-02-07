@@ -46,7 +46,7 @@ type GetAdvertisementResult struct {
 }
 
 type GetAdvertisementsResult struct {
-	AdvertisementID   string `json:"advertisementid"`
+	AdvertisementID   string `json:"id"`
 	UserID            string `json:"userid"`
 	AdvertisementType string `json:"advertisementtype"`
 	EntityID          string `json:"entityid"`
