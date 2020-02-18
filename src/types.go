@@ -2,9 +2,10 @@ package main
 
 import "github.com/gorilla/mux"
 
-type PostAdvertisement struct {
+ type PostAdvertisement struct {
 	UserID            string `json:"userid"`
-	AdvertisementType string `json:'advertisementtype"`
+	IsSelling         string `json:"isselling"`
+	AdvertisementType string `json:"advertisementtype"`
 	EntityID          string `json:"entityid"`
 	Price             string `json:"price"`
 	Description       string `json:"description"`
@@ -19,8 +20,9 @@ type PostAdvertisementResult struct {
 type UpdateAdvertisement struct {
 	AdvertisementID   string `json:"id"`
 	UserID            string `json:"userid"`
+	IsSelling         string `json:"isselling"`
 	AdvertisementType string `json:"advertisementtype"`
-	EntityID          string `json:"entityid`
+	EntityID          string `json:"entityid"`
 	Price             string `json:"price"`
 	Description       string `json:"description"`
 }
@@ -39,15 +41,18 @@ type DeleteAdvertisementResult struct {
 type GetAdvertisementResult struct {
 	AdvertisementID   string `json:"id"`
 	UserID            string `json:"userid"`
+	IsSelling         bool   `json:"isselling"`
 	AdvertisementType string `json:"advertisementtype"`
 	EntityID          string `json:"entityid"`
 	Price             string `json:"price"`
 	Description       string `json:"description"`
+	Message           string `json:"message"`
 }
 
 type GetAdvertisementsResult struct {
 	AdvertisementID   string `json:"id"`
 	UserID            string `json:"userid"`
+	IsSelling         bool   `json:"isselling"`
 	AdvertisementType string `json:"advertisementtype"`
 	EntityID          string `json:"entityid"`
 	Price             string `json:"price"`
@@ -60,6 +65,7 @@ type AdvertisementList struct {
 
 type GetUserAdvertisementResult struct {
 	AdvertisementID   string `json:"advertisementid"`
+	IsSelling         bool   `json:"isselling"`
 	AdvertisementType string `json:"advertisementtype"`
 	EntityID          string `json:"entityid"`
 	Price             string `json:"price"`
@@ -84,7 +90,7 @@ type Server struct {
 	router *mux.Router
 }
 type Config struct {
-	CRUDHost string
-	CRUDPort string
+	CRUDHost        string
+	CRUDPort        string
 	ListenServePort string
 }
