@@ -290,8 +290,7 @@ func (s *Server) handlegetuseradvertisements() http.HandlerFunc {
 			return
 		}
 		defer req.Body.Close()
-		
-		
+
 		getUserAdvertisementResponse := UserAdvertisementList{}
 		getUserAdvertisementResponse.UserAdvertisements = []GetUserAdvertisementResult{}
 
@@ -466,6 +465,62 @@ func (s *Server) handlegetalladvertisements() http.HandlerFunc {
 		if jserr != nil {
 			w.WriteHeader(500)
 			fmt.Fprintf(w, "Unable to create JSON from Pizza List Result...")
+			fmt.Println("Error occured when trying to marshal the decoded response into specified JSON format!")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		w.Write(js)
+	}
+}
+
+func (s *Server) handlegetadvertisementbyposttype() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		advertisementposttype := r.URL.Query().Get("advertposttype")
+		if advertisementposttype == "" {
+			w.WriteHeader(500)
+			fmt.Fprint(w, "Post type not properly provided in URL")
+			fmt.Println("Post type not properly provided in URL")
+			return
+		}
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/advertisementposttype?advertposttype=" + advertisementposttype)
+		if respErr != nil {
+			w.WriteHeader(500)
+			fmt.Fprint(w, respErr.Error())
+			fmt.Println("Error in communication with CRUD service endpoint for request to retrieve advertisement information")
+			return
+		}
+		if req.StatusCode != 200 {
+			w.WriteHeader(req.StatusCode)
+			fmt.Fprint(w, "Request to DB can't be completed...")
+			fmt.Println("Request to DB can't be completed...")
+		}
+		if req.StatusCode == 500 {
+			w.WriteHeader(500)
+			bodyBytes, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				log.Fatal(err)
+			}
+			bodyString := string(bodyBytes)
+			fmt.Fprintf(w, "An internal error has occured whilst trying to get advertisement data"+bodyString)
+			fmt.Println("An internal error has occured whilst trying to get advertisement data" + bodyString)
+			return
+		}
+		defer req.Body.Close()
+		getTypeAdvertisementResponse := TypeAdvertisementList{}
+		getTypeAdvertisementResponse.TypeAdvertisements = []GetAdvertisementsResult{}
+		decoder := json.NewDecoder(req.Body)
+		err := decoder.Decode(&getTypeAdvertisementResponse)
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprint(w, err.Error())
+			fmt.Println("Error occured in decoding get Advertisement response ")
+			return
+		}
+		js, jserr := json.Marshal(getTypeAdvertisementResponse)
+		if jserr != nil {
+			w.WriteHeader(500)
+			fmt.Fprint(w, jserr.Error())
 			fmt.Println("Error occured when trying to marshal the decoded response into specified JSON format!")
 			return
 		}
