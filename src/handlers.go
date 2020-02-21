@@ -801,47 +801,48 @@ func (s *Server) handleupdatetextbook() http.HandlerFunc {
 
 func (s *Server) handlegettextbooksbyfilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// define a new client to send an http request.	
-		client := &http.Client{}
-		// create a new http GET request to the crud and send it the JSON body that was sent to this service.
-		req, respErr := http.NewRequest("GET", "http://" + config.CRUDHost + ":" + config.CRUDPort + "/textbooks", r.Body)
+		textbookfilter := TextbookFilter{}
+		textbookfilter.ModuleCode = r.URL.Query().Get("modulecode")
+		textbookfilter.Name = r.URL.Query().Get("name")
+		textbookfilter.Edition = r.URL.Query().Get("edition")
+		textbookfilter.Quality = r.URL.Query().Get("quality")
+		textbookfilter.Author = r.URL.Query().Get("author")
 
-		// check for any CRUD errors (CRUD being down etc)
+
+
+		// create a new http GET request to the crud and send it the filter headers that was sent to this service.
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/textbooks?modulecode=" + textbookfilter.ModuleCode + "&name="+textbookfilter.Name + "&edition=" + textbookfilter.Edition + "&quality=" + textbookfilter.Quality + "&author=" + textbookfilter.Author)
+
 		if respErr != nil {
 			w.WriteHeader(500)
-			fmt.Fprint(w, respErr.Error())
-			fmt.Println("Error in communication with CRUD service endpoint for request to retrieve textbook information")
+			fmt.Fprintf(w, respErr.Error())
 			return
 		}
-
-		// Request the response back from the CRUD service 
-		resp, err := client.Do(req)
-		if err != nil {
-			fmt.Fprint(w, err.Error())
-			return
-		}
-		// Error check all possible status codes from the response received from the crud.
-		if resp.StatusCode != 200 {
-			w.WriteHeader(resp.StatusCode)
+		if req.StatusCode != 200 {
+			w.WriteHeader(req.StatusCode)
 			fmt.Fprint(w, "Request to DB can't be completed...")
-			fmt.Println("Unable to request post Textbook to the CRUD service")
+			fmt.Println("Request to DB can't be completed...")
 		}
-		if resp.StatusCode == 500 {
+		if req.StatusCode == 500 {
 			w.WriteHeader(500)
 			bodyBytes, err := ioutil.ReadAll(req.Body)
 			if err != nil {
 				log.Fatal(err)
 			}
 			bodyString := string(bodyBytes)
-			fmt.Fprintf(w, "Request to DB can't be completed with request: "+bodyString)
-			fmt.Println("Request to DB can't be completed with request: " + bodyString)
+			fmt.Fprintf(w, "An internal error has occured whilst trying to get advertisement data"+bodyString)
+			fmt.Println("An internal error has occured whilst trying to get advertisement data" + bodyString)
 			return
 		}
+
+		//close the request
+		defer req.Body.Close()
+
 		// define textbook List that is going to be sent back from the crud.s
 		textbookList := TextbookList{}
 		textbookList.Textbooks = []TextbookFilterResult{}
-		decoder := json.NewDecoder(resp.Body)
-		err = decoder.Decode(&textbookList)
+		decoder := json.NewDecoder(req.Body)
+		err := decoder.Decode(&textbookList)
 		if err != nil {
 			w.WriteHeader(500)
 			fmt.Fprint(w, err.Error())
@@ -860,6 +861,7 @@ func (s *Server) handlegettextbooksbyfilter() http.HandlerFunc {
 		w.Write(js)
 	}
 }
+
 
 
 func (s *Server) handleremovetextbook() http.HandlerFunc {
@@ -1051,47 +1053,42 @@ func (s *Server) handleupdatenote() http.HandlerFunc {
 
 func (s *Server) handlegetnotesbyfilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// define a new client to send an http request.	
-		client := &http.Client{}
-		// create a new http GET request to the crud and send it the JSON body that was sent to this service.
-		req, respErr := http.NewRequest("GET", "http://" + config.CRUDHost + ":" + config.CRUDPort + "/notes", r.Body)
+		notefilter := NoteFilter{}
+		
+		notefilter.ModuleCode = r.URL.Query().Get("modulecode")
 
-		// check for any CRUD errors (CRUD being down etc)
+		// create a new http GET request to the crud and send it the filters in the hedaer that was sent to this service.
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/notes?modulecode=" + notefilter.ModuleCode )
+
 		if respErr != nil {
 			w.WriteHeader(500)
-			fmt.Fprint(w, respErr.Error())
-			fmt.Println("Error in communication with CRUD service endpoint for request to retrieve Notes information")
+			fmt.Fprintf(w, respErr.Error())
 			return
 		}
-
-		// Request the response back from the CRUD service 
-		resp, err := client.Do(req)
-		if err != nil {
-			fmt.Fprint(w, err.Error())
-			return
-		}
-		// Error check all possible status codes from the response received from the crud.
-		if resp.StatusCode != 200 {
-			w.WriteHeader(resp.StatusCode)
+		if req.StatusCode != 200 {
+			w.WriteHeader(req.StatusCode)
 			fmt.Fprint(w, "Request to DB can't be completed...")
-			fmt.Println("Unable to request post note to the CRUD service")
+			fmt.Println("Request to DB can't be completed...")
 		}
-		if resp.StatusCode == 500 {
+		if req.StatusCode == 500 {
 			w.WriteHeader(500)
 			bodyBytes, err := ioutil.ReadAll(req.Body)
 			if err != nil {
 				log.Fatal(err)
 			}
 			bodyString := string(bodyBytes)
-			fmt.Fprintf(w, "Request to DB can't be completed with request: "+bodyString)
-			fmt.Println("Request to DB can't be completed with request: " + bodyString)
+			fmt.Fprintf(w, "An internal error has occured whilst trying to get advertisement data"+bodyString)
+			fmt.Println("An internal error has occured whilst trying to get advertisement data" + bodyString)
 			return
 		}
+
+		//close the request
+		defer req.Body.Close()
 		// define notes List that is going to be sent back from the crud.s
 		noteList := NoteList{}
 		noteList.Notes = []NoteFilterResult{}
-		decoder := json.NewDecoder(resp.Body)
-		err = decoder.Decode(&noteList)
+		decoder := json.NewDecoder(req.Body)
+		err := decoder.Decode(&noteList)
 		if err != nil {
 			w.WriteHeader(500)
 			fmt.Fprint(w, err.Error())
@@ -1300,47 +1297,48 @@ func (s *Server) handleupdatetutor() http.HandlerFunc {
 
 func (s *Server) handlegettutorsbyfilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// define a new client to send an http request.	
-		client := &http.Client{}
-		// create a new http GET request to the crud and send it the JSON body that was sent to this service.
-		req, respErr := http.NewRequest("GET", "http://" + config.CRUDHost + ":" + config.CRUDPort + "/tutors", r.Body)
+		tutorfilter := TutorFilter{}
+		
+		tutorfilter.ModuleCode = r.URL.Query().Get("modulecode")
+		tutorfilter.Subject = r.URL.Query().Get("subject")
+		tutorfilter.YearCompleted = r.URL.Query().Get("yearcompleted")
+		tutorfilter.Venue = r.URL.Query().Get("venue")
+		tutorfilter.NotesIncluded = r.URL.Query().Get("notesincluded")
+		tutorfilter.Terms = r.URL.Query().Get("terms")
 
-		// check for any CRUD errors (CRUD being down etc)
+		// create a new http GET request to the crud and send it the filters in the hedaer that was sent to this service.
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/tutors?modulecode=" + tutorfilter.ModuleCode + "&subject=" + tutorfilter.Subject + "&yearcompleted=" + tutorfilter.YearCompleted + "&venue=" + tutorfilter.Venue + "&notesincluded=" + tutorfilter.NotesIncluded + "&terms=" + tutorfilter.Terms)
+
 		if respErr != nil {
 			w.WriteHeader(500)
-			fmt.Fprint(w, respErr.Error())
-			fmt.Println("Error in communication with CRUD service endpoint for request to retrieve Tutors information")
+			fmt.Fprintf(w, respErr.Error())
 			return
 		}
-
-		// Request the response back from the CRUD service 
-		resp, err := client.Do(req)
-		if err != nil {
-			fmt.Fprint(w, err.Error())
-			return
-		}
-		// Error check all possible status codes from the response received from the crud.
-		if resp.StatusCode != 200 {
-			w.WriteHeader(resp.StatusCode)
+		if req.StatusCode != 200 {
+			w.WriteHeader(req.StatusCode)
 			fmt.Fprint(w, "Request to DB can't be completed...")
-			fmt.Println("Unable to request post Tutors to the CRUD service")
+			fmt.Println("Request to DB can't be completed...")
 		}
-		if resp.StatusCode == 500 {
+		if req.StatusCode == 500 {
 			w.WriteHeader(500)
 			bodyBytes, err := ioutil.ReadAll(req.Body)
 			if err != nil {
 				log.Fatal(err)
 			}
 			bodyString := string(bodyBytes)
-			fmt.Fprintf(w, "Request to DB can't be completed with request: "+bodyString)
-			fmt.Println("Request to DB can't be completed with request: " + bodyString)
+			fmt.Fprintf(w, "An internal error has occured whilst trying to get advertisement data"+bodyString)
+			fmt.Println("An internal error has occured whilst trying to get advertisement data" + bodyString)
 			return
 		}
+
+		//close the request
+		defer req.Body.Close()
+
 		// define tutor List that is going to be sent back from the crud.s
 		tutorList := TutorList{}
 		tutorList.Tutors = []TutorFilterResult{}
-		decoder := json.NewDecoder(resp.Body)
-		err = decoder.Decode(&tutorList)
+		decoder := json.NewDecoder(req.Body)
+		err := decoder.Decode(&tutorList)
 		if err != nil {
 			w.WriteHeader(500)
 			fmt.Fprint(w, err.Error())
@@ -1551,47 +1549,46 @@ func (s *Server) handleupdateaccomodation() http.HandlerFunc {
 
 func (s *Server) handlegetaccomodationsbyfilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// define a new client to send an http request.	
-		client := &http.Client{}
-		// create a new http GET request to the crud and send it the JSON body that was sent to this service.
-		req, respErr := http.NewRequest("GET", "http://" + config.CRUDHost + ":" + config.CRUDPort + "/accomodations", r.Body)
+		accomodationfilter := AccomodationFilter{}
+		
+		accomodationfilter.AccomodationTypeCode = r.URL.Query().Get("accomodationtypecode")
+		accomodationfilter.InstitutionName = r.URL.Query().Get("institutionname")
+		accomodationfilter.Location = r.URL.Query().Get("location")
+		accomodationfilter.DistanceToCampus = r.URL.Query().Get("distancetocampus")
+		
 
-		// check for any CRUD errors (CRUD being down etc)
+		// create a new http GET request to the crud and send it the filters in the hedaer that was sent to this service.
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/accomodations?accomodationtypecode=" + accomodationfilter.AccomodationTypeCode + "&institutionname=" + accomodationfilter.InstitutionName + "&location=" + accomodationfilter.Location + "&distancetocampus=" + accomodationfilter.DistanceToCampus )
+
 		if respErr != nil {
 			w.WriteHeader(500)
-			fmt.Fprint(w, respErr.Error())
-			fmt.Println("Error in communication with CRUD service endpoint for request to retrieve Accomodation information")
+			fmt.Fprintf(w, respErr.Error())
 			return
 		}
-
-		// Request the response back from the CRUD service 
-		resp, err := client.Do(req)
-		if err != nil {
-			fmt.Fprint(w, err.Error())
-			return
-		}
-		// Error check all possible status codes from the response received from the crud.
-		if resp.StatusCode != 200 {
-			w.WriteHeader(resp.StatusCode)
+		if req.StatusCode != 200 {
+			w.WriteHeader(req.StatusCode)
 			fmt.Fprint(w, "Request to DB can't be completed...")
-			fmt.Println("Unable to request post Accomodation to the CRUD service")
+			fmt.Println("Request to DB can't be completed...")
 		}
-		if resp.StatusCode == 500 {
+		if req.StatusCode == 500 {
 			w.WriteHeader(500)
 			bodyBytes, err := ioutil.ReadAll(req.Body)
 			if err != nil {
 				log.Fatal(err)
 			}
 			bodyString := string(bodyBytes)
-			fmt.Fprintf(w, "Request to DB can't be completed with request: "+bodyString)
-			fmt.Println("Request to DB can't be completed with request: " + bodyString)
+			fmt.Fprintf(w, "An internal error has occured whilst trying to get advertisement data"+bodyString)
+			fmt.Println("An internal error has occured whilst trying to get advertisement data" + bodyString)
 			return
 		}
+
+		//close the request
+		defer req.Body.Close()
 		// define accomodation List that is going to be sent back from the crud.s
 		accomodationList := AccomodationList{}
 		accomodationList.Accomodations = []AccomodationFilterResult{}
-		decoder := json.NewDecoder(resp.Body)
-		err = decoder.Decode(&accomodationList)
+		decoder := json.NewDecoder(req.Body)
+		err := decoder.Decode(&accomodationList)
 		if err != nil {
 			w.WriteHeader(500)
 			fmt.Fprint(w, err.Error())
