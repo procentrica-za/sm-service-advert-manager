@@ -9,8 +9,6 @@ import (
 	"net/http"
 )
 
-
-
 func (s *Server) handlepostadvertisement() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("handlePostAdvertisement Has Been Called!")
@@ -452,6 +450,115 @@ func (s *Server) handlegetadvertisementbytype() http.HandlerFunc {
 			fmt.Println("Error occured in decoding get Advertisement response ")
 			return
 		}
+
+		// ------- This segment is used to get images for every advertisement of the type requested as seperate calls to the filemanager service. -----------------
+
+		for i, advertisement := range getTypeAdvertisementResponse.TypeAdvertisements {
+
+			req, respErr := http.Get("http://" + config.FILEMANAGERHost + ":" + config.FILEMANAGERPort + "/cardimage?entityid=" + advertisement.AdvertisementID)
+
+			if respErr != nil {
+				w.WriteHeader(500)
+				fmt.Fprint(w, respErr.Error())
+				fmt.Println("Error in communication with CRUD service endpoint for request to retrieve image for advertisement -->" + advertisement.AdvertisementID)
+				return
+			}
+			if req.StatusCode != 200 {
+				w.WriteHeader(req.StatusCode)
+				fmt.Fprint(w, "Request to DB can't be completed...")
+				fmt.Println("Request to DB can't be completed...")
+			}
+			if req.StatusCode == 500 {
+				w.WriteHeader(500)
+				bodyBytes, err := ioutil.ReadAll(req.Body)
+				if err != nil {
+					log.Fatal(err)
+				}
+				bodyString := string(bodyBytes)
+				fmt.Fprintf(w, "An internal error has occured whilst trying to get advertisement image: "+bodyString)
+				fmt.Println("An internal error has occured whilst trying to get advertisement image: " + bodyString)
+				return
+			}
+
+			cardImageBytes := CardImageBytes{}
+			decoder := json.NewDecoder(req.Body)
+			err := decoder.Decode(&cardImageBytes)
+			if err != nil {
+				w.WriteHeader(500)
+				fmt.Fprint(w, err.Error())
+				fmt.Println("Error occured in decoding get Advertisement Image response ")
+				return
+			}
+
+			getTypeAdvertisementResponse.TypeAdvertisements[i].ImageBytes = cardImageBytes.ImageBytes
+
+		}
+		//	----------- End of code segment for single calls to the filemanager service ------------ */
+
+		/*
+			// ---------- This segment is used to get images for every advertisement of the type requested but as 1 call to the filemanager service as a batch request.
+			// Instansiate object to capture advertisement ID.
+			cardImageRequest := CardImageRequest{}
+
+			cardImageBatchRequest := CardImageBatchRequest{}
+			cardImageBatchRequest.Cards = []CardImageRequest{}
+
+			for _, advertisement := range getTypeAdvertisementResponse.TypeAdvertisements {
+				cardImageRequest.EntityID = advertisement.AdvertisementID
+				cardImageBatchRequest.Cards = append(cardImageBatchRequest.Cards, cardImageRequest)
+			}
+
+			requestByte, _ := json.Marshal(cardImageBatchRequest)
+			req, respErr = http.Post("http://"+config.FILEMANAGERHost+":"+config.FILEMANAGERPort+"/cardimagebatch", "application/json", bytes.NewBuffer(requestByte))
+
+			//check for response error of 500
+			if respErr != nil {
+				w.WriteHeader(500)
+				fmt.Fprint(w, respErr.Error())
+				fmt.Println("Error in communication with CRUD service endpoint for request to get file details")
+				return
+			}
+			if req.StatusCode != 200 {
+				fmt.Println("Request to DB can't be completed to get file details")
+			}
+			if req.StatusCode == 500 {
+				w.WriteHeader(500)
+				bodyBytes, err := ioutil.ReadAll(req.Body)
+				if err != nil {
+					log.Fatal(err)
+				}
+				bodyString := string(bodyBytes)
+				fmt.Fprintf(w, "Database error occured upon retrieval: "+bodyString)
+				fmt.Println("Database error occured upon retrieval: " + bodyString)
+				return
+			}
+
+			defer req.Body.Close()
+
+			cardimages := CardBytesBatch{}
+			cardimages.Images = []CardImageBytes{}
+
+			decoder = json.NewDecoder(req.Body)
+			err = decoder.Decode(&cardimages)
+			if err != nil {
+				w.WriteHeader(500)
+				fmt.Fprint(w, err.Error())
+				fmt.Println("Error occured in decoding get batch images response ")
+				return
+			}
+
+
+			// This double for loop might be a bit slow could look at a better implementation.
+			for _, image := range cardimages.Images {
+				for i, advertisement := range getTypeAdvertisementResponse.TypeAdvertisements {
+					if advertisement.AdvertisementID == image.EntityID {
+						getTypeAdvertisementResponse.TypeAdvertisements[i].ImageBytes = image.ImageBytes
+						break
+					}
+				}
+			}
+			 	----------- End of code segment for batch calls to the filemanager service ------------ */
+
 		//convert struct back to JSON
 		js, jserr := json.Marshal(getTypeAdvertisementResponse)
 		if jserr != nil {
@@ -677,7 +784,7 @@ func (s *Server) handlegetadvertisementbyposttype() http.HandlerFunc {
 }
 
 func (s *Server) handleaddtextbook() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request){
+	return func(w http.ResponseWriter, r *http.Request) {
 		textbook := Textbook{}
 		err := json.NewDecoder(r.Body).Decode(&textbook)
 		if err != nil {
@@ -808,10 +915,8 @@ func (s *Server) handlegettextbooksbyfilter() http.HandlerFunc {
 		textbookfilter.Quality = r.URL.Query().Get("quality")
 		textbookfilter.Author = r.URL.Query().Get("author")
 
-
-
 		// create a new http GET request to the crud and send it the filter headers that was sent to this service.
-		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/textbooks?modulecode=" + textbookfilter.ModuleCode + "&name="+textbookfilter.Name + "&edition=" + textbookfilter.Edition + "&quality=" + textbookfilter.Quality + "&author=" + textbookfilter.Author)
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/textbooks?modulecode=" + textbookfilter.ModuleCode + "&name=" + textbookfilter.Name + "&edition=" + textbookfilter.Edition + "&quality=" + textbookfilter.Quality + "&author=" + textbookfilter.Author)
 
 		if respErr != nil {
 			w.WriteHeader(500)
@@ -861,8 +966,6 @@ func (s *Server) handlegettextbooksbyfilter() http.HandlerFunc {
 		w.Write(js)
 	}
 }
-
-
 
 func (s *Server) handleremovetextbook() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -926,10 +1029,10 @@ func (s *Server) handleremovetextbook() http.HandlerFunc {
 	}
 }
 
-// ---- NOTES ---- 
+// ---- NOTES ----
 
 func (s *Server) handleaddnote() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request){
+	return func(w http.ResponseWriter, r *http.Request) {
 		note := Note{}
 		err := json.NewDecoder(r.Body).Decode(&note)
 		if err != nil {
@@ -1054,11 +1157,11 @@ func (s *Server) handleupdatenote() http.HandlerFunc {
 func (s *Server) handlegetnotesbyfilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		notefilter := NoteFilter{}
-		
+
 		notefilter.ModuleCode = r.URL.Query().Get("modulecode")
 
 		// create a new http GET request to the crud and send it the filters in the hedaer that was sent to this service.
-		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/notes?modulecode=" + notefilter.ModuleCode )
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/notes?modulecode=" + notefilter.ModuleCode)
 
 		if respErr != nil {
 			w.WriteHeader(500)
@@ -1173,7 +1276,7 @@ func (s *Server) handleremovenote() http.HandlerFunc {
 // ---- TUTORS ----
 
 func (s *Server) handleaddtutor() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request){
+	return func(w http.ResponseWriter, r *http.Request) {
 		tutor := Tutor{}
 		err := json.NewDecoder(r.Body).Decode(&tutor)
 		if err != nil {
@@ -1298,7 +1401,7 @@ func (s *Server) handleupdatetutor() http.HandlerFunc {
 func (s *Server) handlegettutorsbyfilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tutorfilter := TutorFilter{}
-		
+
 		tutorfilter.ModuleCode = r.URL.Query().Get("modulecode")
 		tutorfilter.Subject = r.URL.Query().Get("subject")
 		tutorfilter.YearCompleted = r.URL.Query().Get("yearcompleted")
@@ -1420,12 +1523,10 @@ func (s *Server) handleremovetutor() http.HandlerFunc {
 	}
 }
 
-
 // ---- ACCOMODATION ----
 
-
 func (s *Server) handleaddaccomodation() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request){
+	return func(w http.ResponseWriter, r *http.Request) {
 		accomodation := Accomodation{}
 		err := json.NewDecoder(r.Body).Decode(&accomodation)
 		if err != nil {
@@ -1550,15 +1651,14 @@ func (s *Server) handleupdateaccomodation() http.HandlerFunc {
 func (s *Server) handlegetaccomodationsbyfilter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		accomodationfilter := AccomodationFilter{}
-		
+
 		accomodationfilter.AccomodationTypeCode = r.URL.Query().Get("accomodationtypecode")
 		accomodationfilter.InstitutionName = r.URL.Query().Get("institutionname")
 		accomodationfilter.Location = r.URL.Query().Get("location")
 		accomodationfilter.DistanceToCampus = r.URL.Query().Get("distancetocampus")
-		
 
 		// create a new http GET request to the crud and send it the filters in the hedaer that was sent to this service.
-		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/accomodations?accomodationtypecode=" + accomodationfilter.AccomodationTypeCode + "&institutionname=" + accomodationfilter.InstitutionName + "&location=" + accomodationfilter.Location + "&distancetocampus=" + accomodationfilter.DistanceToCampus )
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/accomodations?accomodationtypecode=" + accomodationfilter.AccomodationTypeCode + "&institutionname=" + accomodationfilter.InstitutionName + "&location=" + accomodationfilter.Location + "&distancetocampus=" + accomodationfilter.DistanceToCampus)
 
 		if respErr != nil {
 			w.WriteHeader(500)
@@ -1669,3 +1769,40 @@ func (s *Server) handleremoveaccomodation() http.HandlerFunc {
 		w.Write(js)
 	}
 }
+
+/*func (s *Server) handlegetimage(id) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		advertisementid := r.URL.Query().Get("id")
+		if advertisementid == "" {
+			w.WriteHeader(500)
+			fmt.Fprint(w, "accomodation ID not properly provided in URL")
+			fmt.Println("accomodation ID not properly provided in URL")
+			return
+		}
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/image?id=" + advertisementid)
+		if respErr != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, respErr.Error())
+			return
+		}
+		if req.StatusCode != 200 {
+			w.WriteHeader(req.StatusCode)
+			fmt.Fprint(w, "Request to DB can't be completed...")
+			fmt.Println("Request to DB can't be completed...")
+		}
+		if req.StatusCode == 500 {
+			w.WriteHeader(500)
+			bodyBytes, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				log.Fatal(err)
+			}
+			bodyString := string(bodyBytes)
+			fmt.Fprintf(w, "An internal error has occured whilst trying to get image for advertisement"+bodyString)
+			fmt.Println("An internal error has occured whilst trying to get image for advertisement" + bodyString)
+			return
+		}
+
+		//close the request
+		defer req.Body.Close()
+	}
+}*/

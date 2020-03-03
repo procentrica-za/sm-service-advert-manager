@@ -34,4 +34,6 @@ func (s *Server) routes() {
 	s.router.HandleFunc("/accomodation", s.handleupdateaccomodation()).Methods("PUT")
 	s.router.HandleFunc("/accomodation", s.handleremoveaccomodation()).Methods("DELETE")	
 
+	//s.router.HandleFunc("/image", s.handlegetimage()).Methods("GET")
+
 }

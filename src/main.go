@@ -16,6 +16,8 @@ func init() {
 	config = CreateConfig()
 	fmt.Printf("CrudHost: %v\n", config.CRUDHost)
 	fmt.Printf("CrudPort: %v\n", config.CRUDPort)
+	fmt.Printf("FILEManagerHost: %v\n", config.FILEMANAGERHost)
+	fmt.Printf("FILEManagerPort: %v\n", config.FILEMANAGERPort)
 	fmt.Printf("Listening and Serving on Port: %v\n", config.ListenServePort)
 }
 
@@ -23,6 +25,8 @@ func CreateConfig() Config {
 	conf := Config{
 		CRUDHost:        os.Getenv("CRUD_Host"),
 		CRUDPort:        os.Getenv("CRUD_Port"),
+		FILEMANAGERHost: os.Getenv("FILEMANAGER_Host"),
+		FILEMANAGERPort: os.Getenv("FILEMANAGER_Port"),
 		ListenServePort: os.Getenv("LISTEN_SERVE_PORT"),
 	}
 	return conf
