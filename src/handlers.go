@@ -401,6 +401,7 @@ func (s *Server) handlegetadvertisementbytype() http.HandlerFunc {
 
 		advertisementType := r.URL.Query().Get("adverttype")
 		resultlimit := r.URL.Query().Get("limit")
+		isSelling := r.URL.Query().Get("selling")
 
 		//Check if no Advertisement type was provided in the URL
 		if advertisementType == "" {
@@ -411,7 +412,7 @@ func (s *Server) handlegetadvertisementbytype() http.HandlerFunc {
 		}
 
 		//post to crud service
-		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/advertisementtype?adverttype=" + advertisementType + "&limit=" + resultlimit)
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/advertisementtype?adverttype=" + advertisementType + "&limit=" + resultlimit + "&selling=" + isSelling)
 
 		//check for response error of 500
 		if respErr != nil {
