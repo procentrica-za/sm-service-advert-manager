@@ -89,6 +89,7 @@ type GetUserAdvertisementResult struct {
 	EntityID          string `json:"entityid"`
 	Price             string `json:"price"`
 	Description       string `json:"description"`
+	ImageBytes        []byte `json:"imagebytes"`
 }
 
 type UserAdvertisementList struct {

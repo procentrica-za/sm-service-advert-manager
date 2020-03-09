@@ -379,6 +379,66 @@ func (s *Server) handlegetuseradvertisements() http.HandlerFunc {
 			fmt.Println("Error occured in decoding get User Advertisement response ")
 			return
 		}
+
+		cardImageRequest := CardImageRequest{}
+
+		cardImageBatchRequest := CardImageBatchRequest{}
+		cardImageBatchRequest.Cards = []CardImageRequest{}
+
+		for _, advertisement := range getUserAdvertisementResponse.UserAdvertisements {
+			cardImageRequest.EntityID = advertisement.AdvertisementID
+			cardImageBatchRequest.Cards = append(cardImageBatchRequest.Cards, cardImageRequest)
+		}
+
+		requestByte, _ := json.Marshal(cardImageBatchRequest)
+		req, respErr = http.Post("http://"+config.FILEMANAGERHost+":"+config.FILEMANAGERPort+"/cardimagebatch", "application/json", bytes.NewBuffer(requestByte))
+
+		//check for response error of 500
+		if respErr != nil {
+			w.WriteHeader(500)
+			fmt.Fprint(w, respErr.Error())
+			fmt.Println("Error in communication with CRUD service endpoint for request to get file details")
+			return
+		}
+		if req.StatusCode != 200 {
+			fmt.Println("Request to DB can't be completed to get file details")
+		}
+		if req.StatusCode == 500 {
+			w.WriteHeader(500)
+			bodyBytes, err := ioutil.ReadAll(req.Body)
+			if err != nil {
+				log.Fatal(err)
+			}
+			bodyString := string(bodyBytes)
+			fmt.Fprintf(w, "Database error occured upon retrieval: "+bodyString)
+			fmt.Println("Database error occured upon retrieval: " + bodyString)
+			return
+		}
+
+		defer req.Body.Close()
+
+		cardimages := CardBytesBatch{}
+		cardimages.Images = []CardImageBytes{}
+
+		decoder = json.NewDecoder(req.Body)
+		err = decoder.Decode(&cardimages)
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprint(w, err.Error())
+			fmt.Println("Error occured in decoding get batch images response ")
+			return
+		}
+
+		// This double for loop might be a bit slow could look at a better implementation.
+		for _, image := range cardimages.Images {
+			for i, advertisement := range getUserAdvertisementResponse.UserAdvertisements {
+				if advertisement.AdvertisementID == image.EntityID {
+					getUserAdvertisementResponse.UserAdvertisements[i].ImageBytes = image.ImageBytes
+					break
+				}
+			}
+		}
+
 		//convert struct back to JSON
 		js, jserr := json.Marshal(getUserAdvertisementResponse)
 		if jserr != nil {
