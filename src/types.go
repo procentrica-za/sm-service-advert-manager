@@ -167,7 +167,7 @@ type AccomodationAdvertisementList struct {
 }
 
 type GetNoteAdvertisementsResult struct {
-	AdvertisementID   string `json:"advertisementID"`
+	AdvertisementID   string `json:"advertisementid"`
 	UserID            string `json:"userid"`
 	Isselling         bool   `json:"isselling"`
 	Advertisementtype string `json:"advertisementtype"`
