@@ -238,6 +238,7 @@ type DeleteTextbookResult struct {
 }
 
 type Note struct {
+	ID         string `json:"id"`
 	ModuleCode string `json:"modulecode"`
 }
 
@@ -277,6 +278,7 @@ type DeleteNoteResult struct {
 }
 
 type Tutor struct {
+	ID            string `json:"id"`
 	ModuleCode    string `json:"modulecode"`
 	Subject       string `json:"subject"`
 	YearCompleted string `json:"yearcompleted"`
@@ -336,6 +338,7 @@ type DeleteTutorResult struct {
 }
 
 type Accomodation struct {
+	ID                   string `json:"id"`
 	AccomodationTypeCode string `json:"accomodationtypecode"`
 	InstitutionName      string `json:"institutionname"`
 	Location             string `json:"location"`
