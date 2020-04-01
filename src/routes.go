@@ -5,7 +5,7 @@ func (s *Server) routes() {
 	s.router.HandleFunc("/advertisement", s.handleupdateadvertisement()).Methods("PUT")
 	s.router.HandleFunc("/advertisement", s.handleremoveadvertisement()).Methods("DELETE")
 	s.router.HandleFunc("/advertisement", s.handlegetadvertisement()).Methods("GET")
-	
+
 	s.router.HandleFunc("/useradvertisements", s.handlegetuseradvertisements()).Methods("GET")
 	s.router.HandleFunc("/useradvertisements", s.handledeleteuseradvertisements()).Methods("DELETE")
 
@@ -32,7 +32,9 @@ func (s *Server) routes() {
 	s.router.HandleFunc("/accomodations", s.handlegetaccomodationsbyfilter()).Methods("GET")
 	s.router.HandleFunc("/accomodation", s.handleaddaccomodation()).Methods("POST")
 	s.router.HandleFunc("/accomodation", s.handleupdateaccomodation()).Methods("PUT")
-	s.router.HandleFunc("/accomodation", s.handleremoveaccomodation()).Methods("DELETE")	
+	s.router.HandleFunc("/accomodation", s.handleremoveaccomodation()).Methods("DELETE")
+
+	s.router.HandleFunc("/modulecode", s.handlegetmodulecodes()).Methods("GET")
 
 	//s.router.HandleFunc("/image", s.handlegetimage()).Methods("GET")
 
