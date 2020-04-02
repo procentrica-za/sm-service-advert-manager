@@ -494,64 +494,68 @@ func (s *Server) handlegetuseradvertisements() http.HandlerFunc {
 
 			// ---------- This segment is used to get images for every advertisement of the type requested but as 1 call to the filemanager service as a batch request.
 			// Instansiate object to capture advertisement ID.
-			cardImageRequest := CardImageRequest{}
 
-			cardImageBatchRequest := CardImageBatchRequest{}
-			cardImageBatchRequest.Cards = []CardImageRequest{}
+			if textbookAdvertList.Textbooks[0].AdvertisementID != "" {
+				cardImageRequest := CardImageRequest{}
 
-			for _, advertisement := range textbookAdvertList.Textbooks {
-				cardImageRequest.EntityID = advertisement.AdvertisementID
-				cardImageBatchRequest.Cards = append(cardImageBatchRequest.Cards, cardImageRequest)
-			}
+				cardImageBatchRequest := CardImageBatchRequest{}
+				cardImageBatchRequest.Cards = []CardImageRequest{}
 
-			requestByte, _ := json.Marshal(cardImageBatchRequest)
-			req, respErr = http.Post("http://"+config.FILEMANAGERHost+":"+config.FILEMANAGERPort+"/cardimagebatch", "application/json", bytes.NewBuffer(requestByte))
-
-			//check for response error of 500
-			if respErr != nil {
-				w.WriteHeader(500)
-				fmt.Fprint(w, respErr.Error())
-				fmt.Println("Error in communication with CRUD service endpoint for request to get file details")
-				return
-			}
-			if req.StatusCode != 200 {
-				fmt.Println("Request to DB can't be completed to get file details")
-			}
-			if req.StatusCode == 500 {
-				w.WriteHeader(500)
-				bodyBytes, err := ioutil.ReadAll(req.Body)
-				if err != nil {
-					log.Fatal(err)
+				for _, advertisement := range textbookAdvertList.Textbooks {
+					cardImageRequest.EntityID = advertisement.AdvertisementID
+					cardImageBatchRequest.Cards = append(cardImageBatchRequest.Cards, cardImageRequest)
 				}
-				bodyString := string(bodyBytes)
-				fmt.Fprintf(w, "Database error occured upon retrieval: "+bodyString)
-				fmt.Println("Database error occured upon retrieval: " + bodyString)
-				return
-			}
 
-			defer req.Body.Close()
+				requestByte, _ := json.Marshal(cardImageBatchRequest)
+				req, respErr = http.Post("http://"+config.FILEMANAGERHost+":"+config.FILEMANAGERPort+"/cardimagebatch", "application/json", bytes.NewBuffer(requestByte))
 
-			cardimages := CardBytesBatch{}
-			cardimages.Images = []CardImageBytes{}
+				//check for response error of 500
+				if respErr != nil {
+					w.WriteHeader(500)
+					fmt.Fprint(w, respErr.Error())
+					fmt.Println("Error in communication with CRUD service endpoint for request to get file details")
+					return
+				}
+				if req.StatusCode != 200 {
+					fmt.Println("Request to DB can't be completed to get file details")
+				}
+				if req.StatusCode == 500 {
+					w.WriteHeader(500)
+					bodyBytes, err := ioutil.ReadAll(req.Body)
+					if err != nil {
+						log.Fatal(err)
+					}
+					bodyString := string(bodyBytes)
+					fmt.Fprintf(w, "Database error occured upon retrieval: "+bodyString)
+					fmt.Println("Database error occured upon retrieval: " + bodyString)
+					return
+				}
 
-			decoder = json.NewDecoder(req.Body)
-			err = decoder.Decode(&cardimages)
-			if err != nil {
-				w.WriteHeader(500)
-				fmt.Fprint(w, err.Error())
-				fmt.Println("Error occured in decoding get batch images response ")
-				return
-			}
+				defer req.Body.Close()
 
-			// This double for loop might be a bit slow could look at a better implementation.
-			for _, image := range cardimages.Images {
-				for i, advertisement := range textbookAdvertList.Textbooks {
-					if advertisement.AdvertisementID == image.EntityID {
-						textbookAdvertList.Textbooks[i].ImageBytes = image.ImageBytes
-						break
+				cardimages := CardBytesBatch{}
+				cardimages.Images = []CardImageBytes{}
+
+				decoder = json.NewDecoder(req.Body)
+				err = decoder.Decode(&cardimages)
+				if err != nil {
+					w.WriteHeader(500)
+					fmt.Fprint(w, err.Error())
+					fmt.Println("Error occured in decoding get batch images response ")
+					return
+				}
+
+				// This double for loop might be a bit slow could look at a better implementation.
+				for _, image := range cardimages.Images {
+					for i, advertisement := range textbookAdvertList.Textbooks {
+						if advertisement.AdvertisementID == image.EntityID {
+							textbookAdvertList.Textbooks[i].ImageBytes = image.ImageBytes
+							break
+						}
 					}
 				}
 			}
+
 			//	----------- End of code segment for batch calls to the filemanager service ------------ */
 
 			//convert struct back to JSON
@@ -625,64 +629,67 @@ func (s *Server) handlegetuseradvertisements() http.HandlerFunc {
 
 			// ---------- This segment is used to get images for every advertisement of the type requested but as 1 call to the filemanager service as a batch request.
 			// Instansiate object to capture advertisement ID.
-			cardImageRequest := CardImageRequest{}
+			if tutorAdvertList.Tutors[0].AdvertisementID != "" {
+				cardImageRequest := CardImageRequest{}
 
-			cardImageBatchRequest := CardImageBatchRequest{}
-			cardImageBatchRequest.Cards = []CardImageRequest{}
+				cardImageBatchRequest := CardImageBatchRequest{}
+				cardImageBatchRequest.Cards = []CardImageRequest{}
 
-			for _, advertisement := range tutorAdvertList.Tutors {
-				cardImageRequest.EntityID = advertisement.AdvertisementID
-				cardImageBatchRequest.Cards = append(cardImageBatchRequest.Cards, cardImageRequest)
-			}
-
-			requestByte, _ := json.Marshal(cardImageBatchRequest)
-			req, respErr = http.Post("http://"+config.FILEMANAGERHost+":"+config.FILEMANAGERPort+"/cardimagebatch", "application/json", bytes.NewBuffer(requestByte))
-
-			//check for response error of 500
-			if respErr != nil {
-				w.WriteHeader(500)
-				fmt.Fprint(w, respErr.Error())
-				fmt.Println("Error in communication with CRUD service endpoint for request to get file details")
-				return
-			}
-			if req.StatusCode != 200 {
-				fmt.Println("Request to DB can't be completed to get file details")
-			}
-			if req.StatusCode == 500 {
-				w.WriteHeader(500)
-				bodyBytes, err := ioutil.ReadAll(req.Body)
-				if err != nil {
-					log.Fatal(err)
+				for _, advertisement := range tutorAdvertList.Tutors {
+					cardImageRequest.EntityID = advertisement.AdvertisementID
+					cardImageBatchRequest.Cards = append(cardImageBatchRequest.Cards, cardImageRequest)
 				}
-				bodyString := string(bodyBytes)
-				fmt.Fprintf(w, "Database error occured upon retrieval: "+bodyString)
-				fmt.Println("Database error occured upon retrieval: " + bodyString)
-				return
-			}
 
-			defer req.Body.Close()
+				requestByte, _ := json.Marshal(cardImageBatchRequest)
+				req, respErr = http.Post("http://"+config.FILEMANAGERHost+":"+config.FILEMANAGERPort+"/cardimagebatch", "application/json", bytes.NewBuffer(requestByte))
 
-			cardimages := CardBytesBatch{}
-			cardimages.Images = []CardImageBytes{}
+				//check for response error of 500
+				if respErr != nil {
+					w.WriteHeader(500)
+					fmt.Fprint(w, respErr.Error())
+					fmt.Println("Error in communication with CRUD service endpoint for request to get file details")
+					return
+				}
+				if req.StatusCode != 200 {
+					fmt.Println("Request to DB can't be completed to get file details")
+				}
+				if req.StatusCode == 500 {
+					w.WriteHeader(500)
+					bodyBytes, err := ioutil.ReadAll(req.Body)
+					if err != nil {
+						log.Fatal(err)
+					}
+					bodyString := string(bodyBytes)
+					fmt.Fprintf(w, "Database error occured upon retrieval: "+bodyString)
+					fmt.Println("Database error occured upon retrieval: " + bodyString)
+					return
+				}
 
-			decoder = json.NewDecoder(req.Body)
-			err = decoder.Decode(&cardimages)
-			if err != nil {
-				w.WriteHeader(500)
-				fmt.Fprint(w, err.Error())
-				fmt.Println("Error occured in decoding get batch images response ")
-				return
-			}
+				defer req.Body.Close()
 
-			// This double for loop might be a bit slow could look at a better implementation.
-			for _, image := range cardimages.Images {
-				for i, advertisement := range tutorAdvertList.Tutors {
-					if advertisement.AdvertisementID == image.EntityID {
-						tutorAdvertList.Tutors[i].ImageBytes = image.ImageBytes
-						break
+				cardimages := CardBytesBatch{}
+				cardimages.Images = []CardImageBytes{}
+
+				decoder = json.NewDecoder(req.Body)
+				err = decoder.Decode(&cardimages)
+				if err != nil {
+					w.WriteHeader(500)
+					fmt.Fprint(w, err.Error())
+					fmt.Println("Error occured in decoding get batch images response ")
+					return
+				}
+
+				// This double for loop might be a bit slow could look at a better implementation.
+				for _, image := range cardimages.Images {
+					for i, advertisement := range tutorAdvertList.Tutors {
+						if advertisement.AdvertisementID == image.EntityID {
+							tutorAdvertList.Tutors[i].ImageBytes = image.ImageBytes
+							break
+						}
 					}
 				}
 			}
+
 			//	----------- End of code segment for batch calls to the filemanager service ------------ */
 
 			//convert struct back to JSON
@@ -756,64 +763,67 @@ func (s *Server) handlegetuseradvertisements() http.HandlerFunc {
 
 			// ---------- This segment is used to get images for every advertisement of the type requested but as 1 call to the filemanager service as a batch request.
 			// Instansiate object to capture advertisement ID.
-			cardImageRequest := CardImageRequest{}
+			if accomodationAdvertList.Accomodations[0].AdvertisementID != "" {
+				cardImageRequest := CardImageRequest{}
 
-			cardImageBatchRequest := CardImageBatchRequest{}
-			cardImageBatchRequest.Cards = []CardImageRequest{}
+				cardImageBatchRequest := CardImageBatchRequest{}
+				cardImageBatchRequest.Cards = []CardImageRequest{}
 
-			for _, advertisement := range accomodationAdvertList.Accomodations {
-				cardImageRequest.EntityID = advertisement.AdvertisementID
-				cardImageBatchRequest.Cards = append(cardImageBatchRequest.Cards, cardImageRequest)
-			}
-
-			requestByte, _ := json.Marshal(cardImageBatchRequest)
-			req, respErr = http.Post("http://"+config.FILEMANAGERHost+":"+config.FILEMANAGERPort+"/cardimagebatch", "application/json", bytes.NewBuffer(requestByte))
-
-			//check for response error of 500
-			if respErr != nil {
-				w.WriteHeader(500)
-				fmt.Fprint(w, respErr.Error())
-				fmt.Println("Error in communication with CRUD service endpoint for request to get file details")
-				return
-			}
-			if req.StatusCode != 200 {
-				fmt.Println("Request to DB can't be completed to get file details")
-			}
-			if req.StatusCode == 500 {
-				w.WriteHeader(500)
-				bodyBytes, err := ioutil.ReadAll(req.Body)
-				if err != nil {
-					log.Fatal(err)
+				for _, advertisement := range accomodationAdvertList.Accomodations {
+					cardImageRequest.EntityID = advertisement.AdvertisementID
+					cardImageBatchRequest.Cards = append(cardImageBatchRequest.Cards, cardImageRequest)
 				}
-				bodyString := string(bodyBytes)
-				fmt.Fprintf(w, "Database error occured upon retrieval: "+bodyString)
-				fmt.Println("Database error occured upon retrieval: " + bodyString)
-				return
-			}
 
-			defer req.Body.Close()
+				requestByte, _ := json.Marshal(cardImageBatchRequest)
+				req, respErr = http.Post("http://"+config.FILEMANAGERHost+":"+config.FILEMANAGERPort+"/cardimagebatch", "application/json", bytes.NewBuffer(requestByte))
 
-			cardimages := CardBytesBatch{}
-			cardimages.Images = []CardImageBytes{}
+				//check for response error of 500
+				if respErr != nil {
+					w.WriteHeader(500)
+					fmt.Fprint(w, respErr.Error())
+					fmt.Println("Error in communication with CRUD service endpoint for request to get file details")
+					return
+				}
+				if req.StatusCode != 200 {
+					fmt.Println("Request to DB can't be completed to get file details")
+				}
+				if req.StatusCode == 500 {
+					w.WriteHeader(500)
+					bodyBytes, err := ioutil.ReadAll(req.Body)
+					if err != nil {
+						log.Fatal(err)
+					}
+					bodyString := string(bodyBytes)
+					fmt.Fprintf(w, "Database error occured upon retrieval: "+bodyString)
+					fmt.Println("Database error occured upon retrieval: " + bodyString)
+					return
+				}
 
-			decoder = json.NewDecoder(req.Body)
-			err = decoder.Decode(&cardimages)
-			if err != nil {
-				w.WriteHeader(500)
-				fmt.Fprint(w, err.Error())
-				fmt.Println("Error occured in decoding get batch images response ")
-				return
-			}
+				defer req.Body.Close()
 
-			// This double for loop might be a bit slow could look at a better implementation.
-			for _, image := range cardimages.Images {
-				for i, advertisement := range accomodationAdvertList.Accomodations {
-					if advertisement.AdvertisementID == image.EntityID {
-						accomodationAdvertList.Accomodations[i].ImageBytes = image.ImageBytes
-						break
+				cardimages := CardBytesBatch{}
+				cardimages.Images = []CardImageBytes{}
+
+				decoder = json.NewDecoder(req.Body)
+				err = decoder.Decode(&cardimages)
+				if err != nil {
+					w.WriteHeader(500)
+					fmt.Fprint(w, err.Error())
+					fmt.Println("Error occured in decoding get batch images response ")
+					return
+				}
+
+				// This double for loop might be a bit slow could look at a better implementation.
+				for _, image := range cardimages.Images {
+					for i, advertisement := range accomodationAdvertList.Accomodations {
+						if advertisement.AdvertisementID == image.EntityID {
+							accomodationAdvertList.Accomodations[i].ImageBytes = image.ImageBytes
+							break
+						}
 					}
 				}
 			}
+
 			//	----------- End of code segment for batch calls to the filemanager service ------------ */
 
 			//convert struct back to JSON
@@ -887,64 +897,67 @@ func (s *Server) handlegetuseradvertisements() http.HandlerFunc {
 
 			// ---------- This segment is used to get images for every advertisement of the type requested but as 1 call to the filemanager service as a batch request.
 			// Instansiate object to capture advertisement ID.
-			cardImageRequest := CardImageRequest{}
+			if noteAdvertList.Notes[0].AdvertisementID != "" {
+				cardImageRequest := CardImageRequest{}
 
-			cardImageBatchRequest := CardImageBatchRequest{}
-			cardImageBatchRequest.Cards = []CardImageRequest{}
+				cardImageBatchRequest := CardImageBatchRequest{}
+				cardImageBatchRequest.Cards = []CardImageRequest{}
 
-			for _, advertisement := range noteAdvertList.Notes {
-				cardImageRequest.EntityID = advertisement.AdvertisementID
-				cardImageBatchRequest.Cards = append(cardImageBatchRequest.Cards, cardImageRequest)
-			}
-
-			requestByte, _ := json.Marshal(cardImageBatchRequest)
-			req, respErr = http.Post("http://"+config.FILEMANAGERHost+":"+config.FILEMANAGERPort+"/cardimagebatch", "application/json", bytes.NewBuffer(requestByte))
-
-			//check for response error of 500
-			if respErr != nil {
-				w.WriteHeader(500)
-				fmt.Fprint(w, respErr.Error())
-				fmt.Println("Error in communication with CRUD service endpoint for request to get file details")
-				return
-			}
-			if req.StatusCode != 200 {
-				fmt.Println("Request to DB can't be completed to get file details")
-			}
-			if req.StatusCode == 500 {
-				w.WriteHeader(500)
-				bodyBytes, err := ioutil.ReadAll(req.Body)
-				if err != nil {
-					log.Fatal(err)
+				for _, advertisement := range noteAdvertList.Notes {
+					cardImageRequest.EntityID = advertisement.AdvertisementID
+					cardImageBatchRequest.Cards = append(cardImageBatchRequest.Cards, cardImageRequest)
 				}
-				bodyString := string(bodyBytes)
-				fmt.Fprintf(w, "Database error occured upon retrieval: "+bodyString)
-				fmt.Println("Database error occured upon retrieval: " + bodyString)
-				return
-			}
 
-			defer req.Body.Close()
+				requestByte, _ := json.Marshal(cardImageBatchRequest)
+				req, respErr = http.Post("http://"+config.FILEMANAGERHost+":"+config.FILEMANAGERPort+"/cardimagebatch", "application/json", bytes.NewBuffer(requestByte))
 
-			cardimages := CardBytesBatch{}
-			cardimages.Images = []CardImageBytes{}
+				//check for response error of 500
+				if respErr != nil {
+					w.WriteHeader(500)
+					fmt.Fprint(w, respErr.Error())
+					fmt.Println("Error in communication with CRUD service endpoint for request to get file details")
+					return
+				}
+				if req.StatusCode != 200 {
+					fmt.Println("Request to DB can't be completed to get file details")
+				}
+				if req.StatusCode == 500 {
+					w.WriteHeader(500)
+					bodyBytes, err := ioutil.ReadAll(req.Body)
+					if err != nil {
+						log.Fatal(err)
+					}
+					bodyString := string(bodyBytes)
+					fmt.Fprintf(w, "Database error occured upon retrieval: "+bodyString)
+					fmt.Println("Database error occured upon retrieval: " + bodyString)
+					return
+				}
 
-			decoder = json.NewDecoder(req.Body)
-			err = decoder.Decode(&cardimages)
-			if err != nil {
-				w.WriteHeader(500)
-				fmt.Fprint(w, err.Error())
-				fmt.Println("Error occured in decoding get batch images response ")
-				return
-			}
+				defer req.Body.Close()
 
-			// This double for loop might be a bit slow could look at a better implementation.
-			for _, image := range cardimages.Images {
-				for i, advertisement := range noteAdvertList.Notes {
-					if advertisement.AdvertisementID == image.EntityID {
-						noteAdvertList.Notes[i].ImageBytes = image.ImageBytes
-						break
+				cardimages := CardBytesBatch{}
+				cardimages.Images = []CardImageBytes{}
+
+				decoder = json.NewDecoder(req.Body)
+				err = decoder.Decode(&cardimages)
+				if err != nil {
+					w.WriteHeader(500)
+					fmt.Fprint(w, err.Error())
+					fmt.Println("Error occured in decoding get batch images response ")
+					return
+				}
+
+				// This double for loop might be a bit slow could look at a better implementation.
+				for _, image := range cardimages.Images {
+					for i, advertisement := range noteAdvertList.Notes {
+						if advertisement.AdvertisementID == image.EntityID {
+							noteAdvertList.Notes[i].ImageBytes = image.ImageBytes
+							break
+						}
 					}
 				}
 			}
+
 			//	----------- End of code segment for batch calls to the filemanager service ------------ */
 
 			//convert struct back to JSON
