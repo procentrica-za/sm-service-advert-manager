@@ -26,6 +26,7 @@ type PostAdvertisement struct {
 	EntityID          string `json:"entityid"`
 	Price             string `json:"price"`
 	Description       string `json:"description"`
+	Institution       string `json:"institution"`
 }
 
 type PostAdvertisementResult struct {
@@ -119,6 +120,7 @@ type GetTextbookAdvertisementsResult struct {
 	Quality           string `json:"quality"`
 	Author            string `json:"author"`
 	ModuleCode        string `json:"modulecode"`
+	InsitutionName    string `json:"institutionname"`
 	ImageBytes        []byte `json:"imagebytes"`
 }
 
@@ -141,6 +143,7 @@ type GetTutorAdvertisementsResult struct {
 	Notesincluded     string `json:"notesincluded"`
 	Terms             string `json:"terms"`
 	Modulecode        string `json:"modulecode"`
+	InsitutionName    string `json:"institutionname"`
 	ImageBytes        []byte `json:"imagebytes"`
 }
 
@@ -178,6 +181,7 @@ type GetNoteAdvertisementsResult struct {
 	Description       string `json:"description"`
 	NoteID            string `json:"noteid"`
 	ModuleCode        string `json:"modulecode"`
+	InsitutionName    string `json:"institutionname"`
 	ImageBytes        []byte `json:"imagebytes"`
 }
 
