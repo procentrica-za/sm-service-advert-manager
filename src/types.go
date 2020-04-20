@@ -200,8 +200,12 @@ type Textbook struct {
 
 type TextbookResult struct {
 	TextbookAdded bool   `json:"textbookadded"`
-	TextbookID    string `json:"id"`
-	Message       string `json:"message"`
+	TextbookID string `json:"id"`
+	ModuleCode string `json:"modulecode"`
+	Name       string `json:"name"`
+	Edition    string `json:"edition"`
+	Quality    string `json:"quality"`
+	Author     string `json:"author"`
 }
 
 type UpdateTextbook struct {
