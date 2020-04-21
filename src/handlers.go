@@ -1019,8 +1019,6 @@ func (s *Server) handlegetadvertisementbytype() http.HandlerFunc {
 			"&subject=" + SubjectFilter + "&yearcompleted=" + YearcompletedFilter + "&venue=" + VenueFilter + "&notes=" + NotesincludedFilter + "&terms=" + TermsFilter +
 			"&acdType=" + AccomodationtypecodeFilter + "&location=" + LocationFilter + "&distance=" + DistancetocampusFilter + "&institution=" + InsitutionNameFilter)
 
-		//post to crud service
-		fmt.Println(NameFilter)
 		//check for response error of 500
 		if respErr != nil {
 			w.WriteHeader(500)
