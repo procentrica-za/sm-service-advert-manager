@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func (s *Server) handlepostadvertisement() http.HandlerFunc {
@@ -998,6 +999,8 @@ func (s *Server) handlegetadvertisementbytype() http.HandlerFunc {
 
 		ModuleCodeFilter := r.URL.Query().Get("modulecode")
 		NameFilter := r.URL.Query().Get("name")
+		l := strings.NewReplacer(" ", "+")
+		Newname := l.Replace(NameFilter)
 		EditionFilter := r.URL.Query().Get("edition")
 		QualityFilter := r.URL.Query().Get("quality")
 		AuthorFilter := r.URL.Query().Get("author")
@@ -1012,12 +1015,12 @@ func (s *Server) handlegetadvertisementbytype() http.HandlerFunc {
 		InsitutionNameFilter := r.URL.Query().Get("institution")
 		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort +
 			"/advertisementtype?adverttype=" + advertisementType + "&price=" + priceFilter + "&limit=" + resultlimit + "&selling=" + isSelling +
-			"&modulecode=" + ModuleCodeFilter + "&name=" + NameFilter + "&edition=" + EditionFilter + "&quality=" + QualityFilter + "&author=" + AuthorFilter +
+			"&modulecode=" + ModuleCodeFilter + "&name=" + Newname + "&edition=" + EditionFilter + "&quality=" + QualityFilter + "&author=" + AuthorFilter +
 			"&subject=" + SubjectFilter + "&yearcompleted=" + YearcompletedFilter + "&venue=" + VenueFilter + "&notes=" + NotesincludedFilter + "&terms=" + TermsFilter +
 			"&acdType=" + AccomodationtypecodeFilter + "&location=" + LocationFilter + "&distance=" + DistancetocampusFilter + "&institution=" + InsitutionNameFilter)
 
 		//post to crud service
-
+		fmt.Println(NameFilter)
 		//check for response error of 500
 		if respErr != nil {
 			w.WriteHeader(500)
