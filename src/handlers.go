@@ -14,7 +14,7 @@ func (s *Server) handlepostadvertisement() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("handlePostAdvertisement Has Been Called!")
 		//get JSON payload
-
+		fmt.Println("Gcloud test 1 remove this if you see it in console.")
 		postAdvertisement := PostAdvertisement{}
 		err := json.NewDecoder(r.Body).Decode(&postAdvertisement)
 		//handle for bad JSON provided
