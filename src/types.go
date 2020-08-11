@@ -121,6 +121,7 @@ type GetTextbookAdvertisementsResult struct {
 	Author            string `json:"author"`
 	ModuleCode        string `json:"modulecode"`
 	InsitutionName    string `json:"institutionname"`
+	RowNumber         string `json:"rownumber"`
 	ImageBytes        []byte `json:"imagebytes"`
 }
 
@@ -144,6 +145,7 @@ type GetTutorAdvertisementsResult struct {
 	Terms             string `json:"terms"`
 	Modulecode        string `json:"modulecode"`
 	InsitutionName    string `json:"institutionname"`
+	RowNumber         string `json:"rownumber"`
 	ImageBytes        []byte `json:"imagebytes"`
 }
 
@@ -164,6 +166,7 @@ type GetAccomodationAdvertisementsResult struct {
 	Location             string `json:"location"`
 	Distancetocampus     string `json:"distancetocampus"`
 	InsitutionName       string `json:"institutionname"`
+	RowNumber            string `json:"rownumber"`
 	ImageBytes           []byte `json:"imagebytes"`
 }
 
@@ -182,6 +185,7 @@ type GetNoteAdvertisementsResult struct {
 	NoteID            string `json:"noteid"`
 	ModuleCode        string `json:"modulecode"`
 	InsitutionName    string `json:"institutionname"`
+	RowNumber         string `json:"rownumber"`
 	ImageBytes        []byte `json:"imagebytes"`
 }
 
@@ -200,12 +204,12 @@ type Textbook struct {
 
 type TextbookResult struct {
 	TextbookAdded bool   `json:"textbookadded"`
-	TextbookID string `json:"id"`
-	ModuleCode string `json:"modulecode"`
-	Name       string `json:"name"`
-	Edition    string `json:"edition"`
-	Quality    string `json:"quality"`
-	Author     string `json:"author"`
+	TextbookID    string `json:"id"`
+	ModuleCode    string `json:"modulecode"`
+	Name          string `json:"name"`
+	Edition       string `json:"edition"`
+	Quality       string `json:"quality"`
+	Author        string `json:"author"`
 }
 
 type UpdateTextbook struct {

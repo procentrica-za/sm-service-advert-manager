@@ -986,6 +986,7 @@ func (s *Server) handlegetadvertisementbytype() http.HandlerFunc {
 
 		advertisementType := r.URL.Query().Get("adverttype")
 		resultlimit := r.URL.Query().Get("limit")
+		lowerLimit := r.URL.Query().Get("lowerlimit")
 		isSelling := r.URL.Query().Get("selling")
 		priceFilter := r.URL.Query().Get("price")
 		//Check if no Advertisement type was provided in the URL
@@ -1013,7 +1014,7 @@ func (s *Server) handlegetadvertisementbytype() http.HandlerFunc {
 		DistancetocampusFilter := r.URL.Query().Get("distance")
 		InsitutionNameFilter := r.URL.Query().Get("institution")
 		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort +
-			"/advertisementtype?adverttype=" + advertisementType + "&price=" + priceFilter + "&limit=" + resultlimit + "&selling=" + isSelling +
+			"/advertisementtype?adverttype=" + advertisementType + "&price=" + priceFilter + "&limit=" + resultlimit + "&lowerlimit=" + lowerLimit + "&selling=" + isSelling +
 			"&modulecode=" + ModuleCodeFilter + "&name=" + Newname + "&edition=" + EditionFilter + "&quality=" + QualityFilter + "&author=" + AuthorFilter +
 			"&subject=" + SubjectFilter + "&yearcompleted=" + YearcompletedFilter + "&venue=" + VenueFilter + "&notes=" + NotesincludedFilter + "&terms=" + TermsFilter +
 			"&acdType=" + AccomodationtypecodeFilter + "&location=" + LocationFilter + "&distance=" + DistancetocampusFilter + "&institution=" + InsitutionNameFilter)
