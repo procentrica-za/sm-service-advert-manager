@@ -14,7 +14,7 @@ func (s *Server) handlepostadvertisement() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("handlePostAdvertisement Has Been Called!")
 		//get JSON payload
-		fmt.Println("Gcloud test 1 remove this if you see it in console.")
+		//fmt.Println("Gcloud test 1 remove this if you see it in console.")
 		postAdvertisement := PostAdvertisement{}
 		err := json.NewDecoder(r.Body).Decode(&postAdvertisement)
 		//handle for bad JSON provided
@@ -989,6 +989,7 @@ func (s *Server) handlegetadvertisementbytype() http.HandlerFunc {
 		lowerLimit := r.URL.Query().Get("lowerlimit")
 		isSelling := r.URL.Query().Get("selling")
 		priceFilter := r.URL.Query().Get("price")
+		InsitutionNameFilter := r.URL.Query().Get("institution")
 		//Check if no Advertisement type was provided in the URL
 		if advertisementType == "" {
 			w.WriteHeader(500)
@@ -1012,7 +1013,7 @@ func (s *Server) handlegetadvertisementbytype() http.HandlerFunc {
 		AccomodationtypecodeFilter := r.URL.Query().Get("acdType")
 		LocationFilter := r.URL.Query().Get("location")
 		DistancetocampusFilter := r.URL.Query().Get("distance")
-		InsitutionNameFilter := r.URL.Query().Get("institution")
+
 		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort +
 			"/advertisementtype?adverttype=" + advertisementType + "&price=" + priceFilter + "&limit=" + resultlimit + "&lowerlimit=" + lowerLimit + "&selling=" + isSelling +
 			"&modulecode=" + ModuleCodeFilter + "&name=" + Newname + "&edition=" + EditionFilter + "&quality=" + QualityFilter + "&author=" + AuthorFilter +
